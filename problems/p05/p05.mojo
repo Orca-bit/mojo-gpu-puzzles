@@ -11,14 +11,15 @@ alias dtype = DType.float32
 
 
 fn broadcast_add(
-    out: UnsafePointer[Scalar[dtype]],
+    output: UnsafePointer[Scalar[dtype]],
     a: UnsafePointer[Scalar[dtype]],
     b: UnsafePointer[Scalar[dtype]],
     size: Int,
 ):
     row = thread_idx.y
     col = thread_idx.x
-    # FILL ME IN (roughly 2 lines)
+    if row < size and col < size:
+        output[row * size + col] = a[row] + b[col]
 
 
 # ANCHOR_END: broadcast_add
