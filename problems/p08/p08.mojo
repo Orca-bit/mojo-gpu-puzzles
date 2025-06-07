@@ -14,7 +14,7 @@ alias dtype = DType.float32
 
 
 fn add_10_shared(
-    out: UnsafePointer[Scalar[dtype]],
+    output: UnsafePointer[Scalar[dtype]],
     a: UnsafePointer[Scalar[dtype]],
     size: Int,
 ):
@@ -33,7 +33,8 @@ fn add_10_shared(
     # works within a thread block
     barrier()
 
-    # FILL ME IN (roughly 2 lines)
+    if global_i < size:
+        output[global_i] = shared[local_i] + 10
 
 
 # ANCHOR_END: add_10_shared
