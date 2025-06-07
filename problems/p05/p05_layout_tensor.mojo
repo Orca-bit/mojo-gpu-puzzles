@@ -18,14 +18,15 @@ fn broadcast_add[
     a_layout: Layout,
     b_layout: Layout,
 ](
-    out: LayoutTensor[mut=True, dtype, out_layout],
+    output: LayoutTensor[mut=True, dtype, out_layout],
     a: LayoutTensor[mut=False, dtype, a_layout],
     b: LayoutTensor[mut=False, dtype, b_layout],
     size: Int,
 ):
     row = thread_idx.y
     col = thread_idx.x
-    # FILL ME IN (roughly 2 lines)
+    if row < size and col < size:
+        output[row, col] = a[0, col] + b[row, 0]
 
 
 # ANCHOR_END: broadcast_add_layout_tensor
