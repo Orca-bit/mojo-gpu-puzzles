@@ -21,14 +21,25 @@ alias out_layout = Layout.row_major(BATCH, 1)
 fn axis_sum[
     in_layout: Layout, out_layout: Layout
 ](
-    out: LayoutTensor[mut=False, dtype, out_layout],
+    output: LayoutTensor[mut=False, dtype, out_layout],
     a: LayoutTensor[mut=False, dtype, in_layout],
     size: Int,
 ):
     global_i = block_dim.x * block_idx.x + thread_idx.x
     local_i = thread_idx.x
     batch = block_idx.y
-    # FILL ME IN (roughly 15 lines)
+    shared = tb[dtype]().row_major[1, SIZE]().shared().alloc()
+    if local_i < size:
+        shared[0, local_i] = a[batch, local_i]
+    barrier()
+    stride = 1
+    while stride < SIZE:
+        if local_i >= stride:
+            shared[0, local_i] += shared[0, local_i - stride]
+        stride *= 2
+        barrier()
+    if local_i == SIZE - 1:
+        output[batch, 0] = shared[0, local_i]
 
 
 # ANCHOR_END: axis_sum
