@@ -29,13 +29,14 @@ fn dot_product(
     if global_idx < size:
         shared_mem[local_idx] = a[global_idx] * b[global_idx]
     barrier()
+    stride = TPB // 2
+    while stride > 0:
+        if local_idx < stride:
+            shared_mem[local_idx] += shared_mem[local_idx + stride]
+        barrier()
+        stride = stride // 2
     if local_idx == 0:
-        res = shared_mem[0]
-
-        @parameter
-        for i in range(1, TPB):
-            res += shared_mem[i]
-        output[0] = res
+        output[0] = shared_mem[0]
 
 
 # ANCHOR_END: dot_product
