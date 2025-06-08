@@ -14,7 +14,7 @@ alias dtype = DType.float32
 
 
 fn dot_product(
-    out: UnsafePointer[Scalar[dtype]],
+    output: UnsafePointer[Scalar[dtype]],
     a: UnsafePointer[Scalar[dtype]],
     b: UnsafePointer[Scalar[dtype]],
     size: Int,
@@ -35,7 +35,7 @@ fn dot_product(
         @parameter
         for i in range(1, TPB):
             res += shared_mem[i]
-        out[0] = res
+        output[0] = res
 
 
 # ANCHOR_END: dot_product
