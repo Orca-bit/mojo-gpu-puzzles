@@ -20,13 +20,24 @@ alias conv_layout = Layout.row_major(CONV)
 fn conv_1d_simple[
     in_layout: Layout, out_layout: Layout, conv_layout: Layout
 ](
-    out: LayoutTensor[mut=False, dtype, out_layout],
+    output: LayoutTensor[mut=False, dtype, out_layout],
     a: LayoutTensor[mut=False, dtype, in_layout],
     b: LayoutTensor[mut=False, dtype, conv_layout],
 ):
     global_i = block_dim.x * block_idx.x + thread_idx.x
     local_i = thread_idx.x
-    # FILL ME IN (roughly 14 lines)
+    shared_mem_a = tb[dtype]().row_major[SIZE]().shared().alloc()
+    shared_mem_b = tb[dtype]().row_major[CONV]().shared().alloc()
+    if global_i < SIZE:
+        shared_mem_a[local_i] = a[global_i]
+    if local_i < CONV:
+        shared_mem_b[local_i] = b[global_i]
+    barrier()
+    if global_i < SIZE:
+
+        @parameter
+        for j in range(CONV):
+            output[global_i] += shared_mem_a[local_i + j] * shared_mem_b[j]
 
 
 # ANCHOR_END: conv_1d_simple
