@@ -56,12 +56,13 @@ fn single_block_matmul[
         shared_b[local_row, local_col] = b[row, col]
     barrier()
 
-    var res: output.element_type = 0
+    if row < size and col < size:
+        var res: output.element_type = 0
 
-    @parameter
-    for k in range(size):
-        res += shared_a[local_row, k] * shared_b[k, local_col]
-    output[row, col] = res
+        @parameter
+        for k in range(size):
+            res += shared_a[local_row, k] * shared_b[k, local_col]
+        output[row, col] = res
 
 
 # ANCHOR_END: single_block_matmul
