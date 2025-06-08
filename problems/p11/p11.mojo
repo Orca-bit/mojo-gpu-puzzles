@@ -37,7 +37,8 @@ fn conv_1d_simple[
 
         @parameter
         for j in range(CONV):
-            output[global_i] += shared_mem_a[local_i + j] * shared_mem_b[j]
+            if local_i + j < SIZE:
+                output[global_i] += shared_mem_a[local_i + j] * shared_mem_b[j]
 
 
 # ANCHOR_END: conv_1d_simple
