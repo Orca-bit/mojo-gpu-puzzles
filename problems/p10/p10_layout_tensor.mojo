@@ -19,13 +19,25 @@ alias out_layout = Layout.row_major(1)
 fn dot_product[
     in_layout: Layout, out_layout: Layout
 ](
-    out: LayoutTensor[mut=True, dtype, out_layout],
+    output: LayoutTensor[mut=True, dtype, out_layout],
     a: LayoutTensor[mut=True, dtype, in_layout],
     b: LayoutTensor[mut=True, dtype, in_layout],
     size: Int,
 ):
-    # FILL ME IN (roughly 13 lines)
-    ...
+    shared_mem = tb[dtype]().row_major[TPB]().shared().alloc()
+    global_idx = block_idx.x * block_dim.x + thread_idx.x
+    local_idx = thread_idx.x
+    if global_idx < size:
+        shared_mem[local_idx] = a[global_idx] * b[global_idx]
+    barrier()
+    stride = TPB // 2
+    while stride > 0:
+        if local_idx < stride:
+            shared_mem[local_idx] += shared_mem[local_idx + stride]
+        barrier()
+        stride = stride // 2
+    if local_idx == 0:
+        output[0] = shared_mem[0]
 
 
 # ANCHOR_END: dot_product_layout_tensor
