@@ -74,7 +74,7 @@ fn conv_1d_block_boundary[
 
         @parameter
         for j in range(CONV_2 - 1):
-            if global_i + j < SIZE_2:
+            if global_i + 1 + j < SIZE_2:
                 shared_a[local_i + 1 + j] = a[global_i + 1 + j]
     barrier()
     if global_i < SIZE_2:
