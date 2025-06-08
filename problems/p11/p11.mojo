@@ -58,13 +58,33 @@ alias conv_2_layout = Layout.row_major(CONV_2)
 fn conv_1d_block_boundary[
     in_layout: Layout, out_layout: Layout, conv_layout: Layout, dtype: DType
 ](
-    output: LayoutTensor[mut=True, dtype, out_layout],
+    output: LayoutTensor[mut=False, dtype, out_layout],
     a: LayoutTensor[mut=False, dtype, in_layout],
     b: LayoutTensor[mut=False, dtype, conv_layout],
 ):
     global_i = block_dim.x * block_idx.x + thread_idx.x
     local_i = thread_idx.x
-    # FILL ME IN (roughly 18 lines)
+    shared_a = tb[dtype]().row_major[TPB + CONV_2 - 1]().shared().alloc()
+    shared_b = tb[dtype]().row_major[CONV_2]().shared().alloc()
+    if local_i < CONV_2:
+        shared_b[local_i] = b[local_i]
+    if global_i < SIZE_2:
+        shared_a[local_i] = a[global_i]
+    if local_i + 1 == TPB:
+
+        @parameter
+        for j in range(CONV_2 - 1):
+            if global_i + j < SIZE_2:
+                shared_a[local_i + 1 + j] = a[global_i + 1 + j]
+    barrier()
+    if global_i < SIZE_2:
+        var res: output.element_type = 0
+
+        @parameter
+        for j in range(CONV_2):
+            if global_i + j < SIZE_2:
+                res += shared_a[local_i + j] * shared_b[j]
+        output[global_i] = res
 
 
 # ANCHOR_END: conv_1d_block_boundary
