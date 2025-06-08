@@ -29,6 +29,8 @@ fn pooling(
         shared[local_i] = a[global_i]
     barrier()
     res = shared[local_i]
+
+    @parameter
     for offset in range(1, 3):
         if local_i >= offset:
             res += shared[local_i - offset]
