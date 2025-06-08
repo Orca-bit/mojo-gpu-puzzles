@@ -16,7 +16,7 @@ alias layout = Layout.row_major(SIZE)
 fn pooling[
     layout: Layout
 ](
-    out: LayoutTensor[mut=True, dtype, layout],
+    output: LayoutTensor[mut=True, dtype, layout],
     a: LayoutTensor[mut=True, dtype, layout],
     size: Int,
 ):
@@ -25,7 +25,15 @@ fn pooling[
 
     global_i = block_dim.x * block_idx.x + thread_idx.x
     local_i = thread_idx.x
-    # FIX ME IN (roughly 10 lines)
+    shared[local_i] = a[global_i]
+    barrier()
+    res = shared[local_i]
+
+    @parameter
+    for i in range(1, 3):
+        if local_i >= i:
+            res += shared[local_i - i]
+    output[global_i] = res
 
 
 # ANCHOR_END: pooling_layout_tensor
