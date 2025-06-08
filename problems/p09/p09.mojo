@@ -14,7 +14,7 @@ alias dtype = DType.float32
 
 
 fn pooling(
-    out: UnsafePointer[Scalar[dtype]],
+    output: UnsafePointer[Scalar[dtype]],
     a: UnsafePointer[Scalar[dtype]],
     size: Int,
 ):
@@ -25,7 +25,14 @@ fn pooling(
     ]()
     global_i = block_dim.x * block_idx.x + thread_idx.x
     local_i = thread_idx.x
-    # FILL ME IN (roughly 10 lines)
+    if global_i < size:
+        shared[local_i] = a[global_i]
+    barrier()
+    res = shared[local_i]
+    for offset in range(1, 3):
+        if local_i >= offset:
+            res += shared[local_i - offset]
+    output[global_i] = res
 
 
 # ANCHOR_END: pooling
