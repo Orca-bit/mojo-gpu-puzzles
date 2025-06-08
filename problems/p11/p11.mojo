@@ -34,11 +34,13 @@ fn conv_1d_simple[
         shared_mem_b[local_i] = b[global_i]
     barrier()
     if global_i < SIZE:
+        var res: output.element_type = 0
 
         @parameter
         for j in range(CONV):
             if local_i + j < SIZE:
-                output[global_i] += shared_mem_a[local_i + j] * shared_mem_b[j]
+                res += shared_mem_a[local_i + j] * shared_mem_b[j]
+        output[global_i] = res
 
 
 # ANCHOR_END: conv_1d_simple
