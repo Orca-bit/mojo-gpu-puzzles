@@ -137,7 +137,7 @@ fn matmul_tiled[
         b_tile = b.tile[TPB, TPB](tile, block_idx.x)
 
         copy_dram_to_sram_async[thread_layout=load_a_layout](shared_a, a_tile)
-        copy_dram_to_sram_async[thread_layout=load_a_layout](shared_b, b_tile)
+        copy_dram_to_sram_async[thread_layout=load_b_layout](shared_b, b_tile)
         async_copy_wait_all()
 
         barrier()
