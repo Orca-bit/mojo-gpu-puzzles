@@ -133,8 +133,8 @@ fn matmul_tiled[
 
     @parameter
     for tile in range((size + TPB - 1) // TPB):
-        a_tile = a.tile[TPB, TPB](block_dim.y, tile)
-        b_tile = b.tile[TPB, TPB](tile, block_dim.x)
+        a_tile = a.tile[TPB, TPB](block_idx.y, tile)
+        b_tile = b.tile[TPB, TPB](tile, block_idx.x)
 
         copy_dram_to_sram_async[thread_layout=load_a_layout](shared_a, a_tile)
         copy_dram_to_sram_async[thread_layout=load_b_layout](shared_b, b_tile)
